@@ -1,4 +1,4 @@
-name = "cloudflare-workers-template"
+name = "persistend-cart-worker"
 main = "./dist/worker.js"
 account_id = "e56b18ce4c0cf671554cd09cd9b5e6f2"
 workers_dev = true
