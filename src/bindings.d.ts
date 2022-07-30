@@ -31,7 +31,7 @@ declare global {
     url: string
     featured_image: {
       aspect_ratio: number
-      alt: string|null
+      alt: string | null
       height: number
       url: string
       width: number
@@ -54,7 +54,7 @@ declare global {
 
   interface Cart {
     token: string
-    note: string|null
+    note: string | null
     attributes: any
     original_total_price: number
     total_price: number

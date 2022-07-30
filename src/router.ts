@@ -1,8 +1,17 @@
 import { Router, Method } from 'tiny-request-router'
-import { addItem, clearCart, fetchCart, updateCart, updateItem } from './routes/cart'
+import {
+  addItem,
+  clearCart,
+  fetchCart,
+  updateCart,
+  updateItem,
+} from './routes/cart'
 import { deleteCart } from './routes/webhooks'
 
-export async function route(event: FetchEvent, request: Request): Promise<Response> {
+export async function route(
+  event: FetchEvent,
+  request: Request,
+): Promise<Response> {
   const router = new Router()
   const url = new URL(request.url)
 
@@ -16,7 +25,7 @@ export async function route(event: FetchEvent, request: Request): Promise<Respon
 
   const match = router.match(<Method>request.method, url.pathname)
   if (match) {
-    return match.handler({params: match.params, request, event})
+    return match.handler({ params: match.params, request, event })
   } else {
     // return origin if we do not have a matching route
     return fetch(request)
@@ -25,6 +34,6 @@ export async function route(event: FetchEvent, request: Request): Promise<Respon
 
 export interface RouteProps {
   params: Params
-  request: Request,
+  request: Request
   event: FetchEvent
 }

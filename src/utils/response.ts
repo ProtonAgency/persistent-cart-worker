@@ -1,8 +1,15 @@
-export default function createResponse(body: any, headers = {}, code = 200): Response {
+export default function createResponse(
+  body: unknown,
+  headers = {},
+  code = 200,
+): Response {
   const defaultHeaders = new Headers(headers)
   defaultHeaders.set('Content-Type', 'application/json')
   defaultHeaders.set('Access-Control-Allow-Origin', '*')
-  defaultHeaders.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,POST,DELETE,OPTIONS')
+  defaultHeaders.set(
+    'Access-Control-Allow-Methods',
+    'GET,POST,PUT,PATCH,POST,DELETE,OPTIONS',
+  )
   defaultHeaders.set('Access-Control-Max-Age', '86400')
   defaultHeaders.set('Access-Control-Allow-Headers', '*')
 
