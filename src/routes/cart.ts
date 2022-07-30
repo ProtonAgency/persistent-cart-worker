@@ -89,7 +89,7 @@ export async function updateItem({ request, event }: RouteProps): Promise<Respon
   const cart = await loadCart(cartToken)
 
   const payload: { id: number | string; quantity: number } = await request.json()
-  if (!payload.id || !payload.quantity)
+  if (!payload.id || typeof payload.quantity !== 'number')
     return createResponse(
       {
         error: 'Missing `id` or `quantity`',
