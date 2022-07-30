@@ -8,7 +8,7 @@ import buildHeaders from '../utils/build-headers'
 const COOKIE_NAME = '__ctoken'
 const MAX_AGE = 31_536_000 // one year
 
-export async function fetchCart({ request }: RouteProps): Promise<Response> {
+export async function fetchCart({ request, event }: RouteProps): Promise<Response> {
   const host = (new URL(request.url)).hostname
   const cookie = parse(request.headers.get('Cookie') || '');
   const cartToken = cookie[COOKIE_NAME] ?? uuid()
@@ -53,6 +53,27 @@ export async function fetchCart({ request }: RouteProps): Promise<Response> {
           'content-type': 'application/json',
         }
       })
+
+      const addTokenResponse = await fetch(`https://${host}/cart/update.js`, {
+        method: 'POST',
+        body: JSON.stringify({
+          attributes: {
+            'x-cart-id': cartToken,
+          },
+        }),
+        headers: {
+          ...buildHeaders(request, addResponse.headers.getAll('Set-Cookie').join(', ')),
+          'content-type': 'application/json',
+        }
+      })
+
+      const json: Cart = await addTokenResponse.json()
+      const newCart = {
+        ...json,
+        token: cart.token,
+      }
+    
+      event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
 
       addResponse.headers.getAll('Set-Cookie').forEach(c => headers.append('Set-Cookie', c))
     }
