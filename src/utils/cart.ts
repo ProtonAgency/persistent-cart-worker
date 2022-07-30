@@ -66,6 +66,7 @@ export async function generateCart(
   const newCart = {
     ...json,
     token: cart.token,
+    items: json.items.sort((a: CartItem, b: CartItem) => a.key > b.key ? 1 : -1)
   }
 
   return {

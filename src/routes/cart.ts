@@ -42,6 +42,8 @@ export async function fetchCart({
     }
   }
 
+  cart.items = cart.items.sort((a: CartItem, b: CartItem) => a.key > b.key ? 1 : -1)
+
   return createResponse(cart, headers, 200)
 }
 
