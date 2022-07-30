@@ -3,6 +3,17 @@ main = "./dist/worker.js"
 account_id = "e56b18ce4c0cf671554cd09cd9b5e6f2"
 workers_dev = true
 compatibility_date="2022-06-09"
+routes = ["staging-579.rainbowshops.com/*"]
+local_protocol="http"
+upstream_protocol="https"
+
+kv_namespaces = [
+  { binding = "CART_STORE", id = "", preview_id = "" }
+]
 
 [build]
 command = "npm install && npm run build"
+
+[miniflare]
+upstream = "https:/staging-579.rainbowshops.com"
+kv_persist = true

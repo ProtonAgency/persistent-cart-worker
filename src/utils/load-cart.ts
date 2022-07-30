@@ -1,5 +1,5 @@
 export default async function loadCart(token: string): Promise<Cart> {
-  return await CART_STORE.get(token, 'json') || {
+  return (token === 'no-cart' ? null : await CART_STORE.get(token, 'json')) || {
     token: token,
     note: null,
     attributes: {},
