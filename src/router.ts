@@ -1,5 +1,6 @@
 import { Router, Method } from 'tiny-request-router'
 import { addItem, clearCart, fetchCart, updateCart, updateItem } from './routes/cart'
+import { deleteCart } from './routes/webhooks'
 
 export async function route(event: FetchEvent, request: Request): Promise<Response> {
   const router = new Router()
@@ -11,7 +12,7 @@ export async function route(event: FetchEvent, request: Request): Promise<Respon
   router.post('/cart/change.js', updateItem)
   router.post('/cart/update.js', updateCart)
 
-  // router.post('/cdn-cgi/shopify/webhook', null)
+  router.post('/cdn-cgi/shopify/webhook', deleteCart)
 
   const match = router.match(<Method>request.method, url.pathname)
   if (match) {
