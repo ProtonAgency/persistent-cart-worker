@@ -27,13 +27,21 @@ export async function generateCart(
     method: 'POST',
     body: JSON.stringify({
       items: cart.items
-        .map((it) => {
-          return {
-            id: it.id,
-            quantity: it.quantity,
-            properties: it.properties || undefined,
-          }
-        })
+        .map(
+          (
+            it,
+          ): {
+            id: number
+            quantity: number
+            properties: { [key: string]: string } | null | undefined
+          } => {
+            return {
+              id: it.id,
+              quantity: it.quantity,
+              properties: it.properties || undefined,
+            }
+          },
+        )
         .concat(additionalItems),
     }),
     headers: {
@@ -54,10 +62,7 @@ export async function generateCart(
       },
     }),
     headers: {
-      ...buildHeaders(
-        request,
-        addResponse.headers.getAll('Set-Cookie').join(', '),
-      ),
+      ...buildHeaders(request, addResponse.headers.getAll('Set-Cookie').join(', ')),
       'content-type': 'application/json',
     },
   })
@@ -66,7 +71,7 @@ export async function generateCart(
   const newCart = {
     ...json,
     token: cart.token,
-    items: json.items.sort((a: CartItem, b: CartItem) => a.key > b.key ? 1 : -1)
+    items: json.items.sort((a: CartItem, b: CartItem) => (a.key > b.key ? 1 : -1)),
   }
 
   return {

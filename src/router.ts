@@ -1,17 +1,8 @@
 import { Router, Method } from 'tiny-request-router'
-import {
-  addItem,
-  clearCart,
-  fetchCart,
-  updateCart,
-  updateItem,
-} from './routes/cart'
+import { addItem, clearCart, fetchCart, updateCart, updateItem } from './routes/cart'
 import { deleteCart } from './routes/webhooks'
 
-export async function route(
-  event: FetchEvent,
-  request: Request,
-): Promise<Response> {
+export async function route(event: FetchEvent, request: Request): Promise<Response> {
   const router = new Router()
   const url = new URL(request.url)
 
