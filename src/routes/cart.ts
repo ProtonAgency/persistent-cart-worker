@@ -57,16 +57,25 @@ export async function addItem({
   // todo: add validation for the payload
   const payload: { items: CartItem[] } = await request.json()
 
-  const { cart: newCart, headers: addResponseHeaders } = await generateCart(
-    request,
-    cart,
-    cartToken,
-    payload.items,
-  )
+  const {
+    cart: newCart,
+    headers: addResponseHeaders,
+    message,
+  } = await generateCart(request, cart, cartToken, payload.items).catch((e) => {
+    return {
+      message: e.message,
+      cart: null,
+      headers: null,
+    }
+  })
+
+  if (message) {
+    return createResponse(JSON.parse(message), {}, 409)
+  }
 
   event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
 
-  const newHeaders = new Headers(addResponseHeaders)
+  const newHeaders = new Headers(addResponseHeaders || {})
   newHeaders.append(
     'Set-Cookie',
     `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
@@ -91,15 +100,25 @@ export async function updateItem({
     it.quantity = it.key === payload.id ? payload.quantity : it.quantity
     return it
   })
-  const { cart: newCart, headers: addResponseHeaders } = await generateCart(
-    request,
-    cart,
-    cartToken,
-  )
+  const {
+    cart: newCart,
+    headers: addResponseHeaders,
+    message,
+  } = await generateCart(request, cart, cartToken).catch((e) => {
+    return {
+      message: e.message,
+      cart: null,
+      headers: null,
+    }
+  })
+
+  if (message) {
+    return createResponse(JSON.parse(message), {}, 409)
+  }
 
   event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
 
-  const newHeaders = new Headers(addResponseHeaders)
+  const newHeaders = new Headers(addResponseHeaders || {})
   newHeaders.append(
     'Set-Cookie',
     `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
@@ -124,11 +143,21 @@ export async function updateCart({
     note: string | undefined | null
   } = await request.json()
 
-  const { headers: addResponseHeaders } = await generateCart(
+  const { headers: addResponseHeaders, message } = await generateCart(
     request,
     cart,
     cartToken,
-  )
+  ).catch((e) => {
+    return {
+      message: e.message,
+      cart: null,
+      headers: null,
+    }
+  })
+
+  if (message) {
+    return createResponse(JSON.parse(message), {}, 409)
+  }
 
   // add token property
   const addTokenResponse = await fetch(`https://${host}/cart/update.js`, {
@@ -143,7 +172,7 @@ export async function updateCart({
     headers: {
       ...buildHeaders(
         request,
-        addResponseHeaders.getAll('Set-Cookie').join(', '),
+        (addResponseHeaders || new Headers()).getAll('Set-Cookie').join(', '),
       ),
       'content-type': 'application/json',
     },
@@ -157,7 +186,7 @@ export async function updateCart({
 
   event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
 
-  const newHeaders = new Headers(addResponseHeaders)
+  const newHeaders = new Headers(addResponseHeaders || {})
   newHeaders.append(
     'Set-Cookie',
     `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,

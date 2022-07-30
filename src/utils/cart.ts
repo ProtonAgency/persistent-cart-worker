@@ -9,7 +9,7 @@ export async function generateCart(
     quantity: number
     properties: { [key: string]: string } | null | undefined
   }[] = [],
-): Promise<{ cart: Cart; headers: Headers }> {
+): Promise<{ cart: Cart; headers: Headers; message: string | undefined }> {
   const host = new URL(request.url).hostname
   await fetch(`https://${host}/cart/clear.js`, {
     headers: {
@@ -42,6 +42,10 @@ export async function generateCart(
     },
   })
 
+  if (!addResponse.ok) {
+    throw new Error(await addResponse.text())
+  }
+
   const addTokenResponse = await fetch(`https://${host}/cart/update.js`, {
     method: 'POST',
     body: JSON.stringify({
@@ -67,5 +71,6 @@ export async function generateCart(
   return {
     cart: newCart,
     headers: addResponse.headers,
+    message: undefined,
   }
 }
