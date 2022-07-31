@@ -189,15 +189,16 @@ export async function updateCart({ request, event }: RouteProps): Promise<Respon
 export async function clearCart({ request, event }: RouteProps): Promise<Response> {
   const host = new URL(request.url).hostname
   const cookie = parse(request.headers.get('Cookie') || '')
-  const cartToken = cookie[COOKIE_NAME] ?? uuid()
+  const oldCartToken = cookie[COOKIE_NAME] ?? uuid()
+  const newCartToken = uuid()
 
-  event.waitUntil(CART_STORE.delete(cartToken))
+  event.waitUntil(CART_STORE.delete(oldCartToken))
 
   return fetch(`https://${host}/cart/clear.js`, {
     headers: buildHeaders(request),
   }).then(() =>
-    loadCart('no-cart').then((cart) =>
-      createResponse(cart, { 'Set-Cookie': generateCookieValue(cartToken) }, 200),
+    loadCart(newCartToken).then((cart) =>
+      createResponse(cart, { 'Set-Cookie': generateCookieValue(newCartToken) }, 200),
     ),
   )
 }

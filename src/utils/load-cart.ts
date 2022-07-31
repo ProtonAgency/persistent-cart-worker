@@ -1,9 +1,7 @@
-import { uuid } from '@cfworker/uuid'
-
 export default async function loadCart(token: string): Promise<Cart> {
   return (
-    (token === 'no-cart' ? null : await CART_STORE.get(token, 'json')) || {
-      token: token === 'no-cart' ? uuid() : token,
+    (await CART_STORE.get(token, 'json')) || {
+      token: token,
       note: null,
       attributes: {},
       original_total_price: 0,
