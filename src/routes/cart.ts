@@ -16,14 +16,17 @@ export async function viewCart({ request, event }: RouteProps): Promise<Response
   const cookie = parse(request.headers.get('Cookie') || '')
   const cartToken = cookie[COOKIE_NAME] ?? uuid()
 
-  const cart = await loadCart(cartToken)
-  const headers = new Headers({ 'Set-Cookie': generateCookieValue(cartToken) })
-  if (cart.item_count > 0) {
-    const { cart: newCart, headers: addResponseHeaders } = await generateCart(request, cart, cartToken)
-    event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
-    addResponseHeaders.getAll('Set-Cookie').forEach((c) => headers.append('Set-Cookie', c))
-  }
-  return fetch(request)
+  const response = fetch(request)
+  try {
+    const cart = await loadCart(cartToken)
+    const headers = new Headers({ 'Set-Cookie': generateCookieValue(cartToken) })
+    if (cart.item_count > 0) {
+      const { cart: newCart, headers: addResponseHeaders } = await generateCart(request, cart, cartToken)
+      event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
+      addResponseHeaders.getAll('Set-Cookie').forEach((c) => headers.append('Set-Cookie', c))
+    }
+  } catch(e) { null }
+  return response
 }
 
 export async function fetchCart({ request /**, event*/ }: RouteProps): Promise<Response> {
