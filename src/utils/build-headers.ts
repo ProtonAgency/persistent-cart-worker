@@ -1,7 +1,7 @@
 export default function buildHeaders(
   request: Request | Response,
   overrideCookieHeader: string | null = null,
-) {
+): { [key: string]: string } {
   return {
     Accept: String(request.headers.get('accept')),
     'Accept-Encoding': String(request.headers.get('accept-encoding')),

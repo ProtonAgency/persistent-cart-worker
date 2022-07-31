@@ -9,14 +9,15 @@ import { generateCart } from '../utils/cart'
 const COOKIE_NAME = '__ctoken'
 const MAX_AGE = 31_536_000 // one year
 
+const generateCookieValue = (cartToken: string): string =>
+  `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`
+
 export async function viewCart({ request, event }: RouteProps): Promise<Response> {
   const cookie = parse(request.headers.get('Cookie') || '')
   const cartToken = cookie[COOKIE_NAME] ?? uuid()
 
   const cart = await loadCart(cartToken)
-  const headers = new Headers({
-    'Set-Cookie': `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
-  })
+  const headers = new Headers({ 'Set-Cookie': generateCookieValue(cartToken) })
   if (cart.item_count > 0) {
     const { cart: newCart, headers: addResponseHeaders } = await generateCart(request, cart, cartToken)
     event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
@@ -31,9 +32,7 @@ export async function fetchCart({ request /**, event*/ }: RouteProps): Promise<R
   const cartToken = cookie[COOKIE_NAME] ?? uuid()
 
   const cart = await loadCart(cartToken)
-  const headers = new Headers({
-    'Set-Cookie': `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
-  })
+  const headers = new Headers({ 'Set-Cookie': generateCookieValue(cartToken) })
   // if (cart.item_count > 0) {
   //   const r = await fetch(`https://${host}/cart.js`, {
   //     headers: buildHeaders(request),
@@ -62,14 +61,9 @@ export async function addItem({ request, event }: RouteProps): Promise<Response>
 
   const payload: { items: CartItem[] } = await request.json()
 
-  if (payload.items.some((it) => !it.id || !it.quantity))
-    return createResponse(
-      {
-        error: 'Missing `id` or `quantity`',
-      },
-      {},
-      409,
-    )
+  if (payload.items.some((it) => !it.id || !it.quantity)) {
+    return createResponse({ error: 'Missing `id` or `quantity`' }, {}, 409)
+  }
 
   const {
     cart: newCart,
@@ -90,10 +84,7 @@ export async function addItem({ request, event }: RouteProps): Promise<Response>
   event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
 
   const newHeaders = new Headers(addResponseHeaders || {})
-  newHeaders.append(
-    'Set-Cookie',
-    `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
-  )
+  newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
 
   return createResponse(newCart, newHeaders, 200)
 }
@@ -105,14 +96,9 @@ export async function updateItem({ request, event }: RouteProps): Promise<Respon
   const cart = await loadCart(cartToken)
 
   const payload: { id: number | string; quantity: number } = await request.json()
-  if (!payload.id || typeof payload.quantity !== 'number')
-    return createResponse(
-      {
-        error: 'Missing `id` or `quantity`',
-      },
-      {},
-      409,
-    )
+  if (!payload.id || typeof payload.quantity !== 'number') {
+    return createResponse({ error: 'Missing `id` or `quantity`' }, {}, 409)
+  }
   cart.items = cart.items.map((it) => {
     it.quantity = it.key === payload.id ? payload.quantity : it.quantity
     return it
@@ -136,10 +122,7 @@ export async function updateItem({ request, event }: RouteProps): Promise<Respon
   event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
 
   const newHeaders = new Headers(addResponseHeaders || {})
-  newHeaders.append(
-    'Set-Cookie',
-    `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
-  )
+  newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
 
   return createResponse(newCart, newHeaders, 200)
 }
@@ -195,10 +178,7 @@ export async function updateCart({ request, event }: RouteProps): Promise<Respon
   event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
 
   const newHeaders = new Headers(addResponseHeaders || {})
-  newHeaders.append(
-    'Set-Cookie',
-    `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
-  )
+  newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
 
   return createResponse(newCart, newHeaders, 200)
 }
@@ -211,18 +191,10 @@ export async function clearCart({ request, event }: RouteProps): Promise<Respons
   event.waitUntil(CART_STORE.delete(cartToken))
 
   return fetch(`https://${host}/cart/clear.js`, {
-    headers: {
-      ...buildHeaders(request),
-    },
+    headers: buildHeaders(request),
   }).then(() =>
     loadCart('no-cart').then((cart) =>
-      createResponse(
-        cart,
-        {
-          'Set-Cookie': `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
-        },
-        200,
-      ),
+      createResponse(cart, { 'Set-Cookie': generateCookieValue(cartToken) }, 200),
     ),
   )
 }
