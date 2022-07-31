@@ -9,8 +9,7 @@ import { generateCart } from '../utils/cart'
 const COOKIE_NAME = '__ctoken'
 const MAX_AGE = 31_536_000 // one year
 
-export async function fetchCart({ request, event }: RouteProps): Promise<Response> {
-  const host = new URL(request.url).hostname
+export async function viewCart({ request, event }: RouteProps): Promise<Response> {
   const cookie = parse(request.headers.get('Cookie') || '')
   const cartToken = cookie[COOKIE_NAME] ?? uuid()
 
@@ -19,21 +18,38 @@ export async function fetchCart({ request, event }: RouteProps): Promise<Respons
     'Set-Cookie': `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
   })
   if (cart.item_count > 0) {
-    const r = await fetch(`https://${host}/cart.js`, {
-      headers: buildHeaders(request),
-    })
-
-    const json: Cart = await r.json()
-    if (json.item_count !== cart.item_count) {
-      const { cart: newCart, headers: addResponseHeaders } = await generateCart(request, cart, cartToken)
-
-      event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
-
-      addResponseHeaders.getAll('Set-Cookie').forEach((c) => headers.append('Set-Cookie', c))
-    }
+    const { cart: newCart, headers: addResponseHeaders } = await generateCart(request, cart, cartToken)
+    event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
+    addResponseHeaders.getAll('Set-Cookie').forEach((c) => headers.append('Set-Cookie', c))
   }
+  return fetch(request)
+}
 
-  cart.items = cart.items.sort((a: CartItem, b: CartItem) => (a.key > b.key ? 1 : -1))
+export async function fetchCart({ request /**, event*/ }: RouteProps): Promise<Response> {
+  // const host = new URL(request.url).hostname
+  const cookie = parse(request.headers.get('Cookie') || '')
+  const cartToken = cookie[COOKIE_NAME] ?? uuid()
+
+  const cart = await loadCart(cartToken)
+  const headers = new Headers({
+    'Set-Cookie': `${COOKIE_NAME}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${MAX_AGE}`,
+  })
+  // if (cart.item_count > 0) {
+  //   const r = await fetch(`https://${host}/cart.js`, {
+  //     headers: buildHeaders(request),
+  //   })
+
+  //   const json: Cart = await r.json()
+  //   if (json.item_count !== cart.item_count) {
+  //     const { cart: newCart, headers: addResponseHeaders } = await generateCart(request, cart, cartToken)
+
+  //     event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
+
+  //     addResponseHeaders.getAll('Set-Cookie').forEach((c) => headers.append('Set-Cookie', c))
+  //   }
+  // }
+
+  // cart.items = cart.items.sort((a: CartItem, b: CartItem) => (a.key > b.key ? 1 : -1))
 
   return createResponse(cart, headers, 200)
 }
