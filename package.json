@@ -1,12 +1,11 @@
 {
-  "name": "cloudflare-workers-template",
+  "name": "persistent-cart-worker",
   "version": "1.0.0",
-  "description": "Cloudflare worker TypeScript template",
   "main": "dist/worker.js",
   "scripts": {
     "build": "webpack",
-    "format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
-    "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js}' 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'"
+    "format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}'",
+    "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js}' 'src/**/*.{js,ts}'"
   },
   "author": "opensource@ptn.dev",
   "license": "MIT OR Apache-2.0",
