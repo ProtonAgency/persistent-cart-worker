@@ -1,16 +1,13 @@
 import { RouteProps } from '../router'
-import { parse } from 'cookie'
 import createResponse from '../utils/response'
 import buildHeaders from '../utils/build-headers'
 import { generateCart, loadCart } from '../utils/cart'
 import config from '../../cart.config'
-
-const generateCookieValue = (cartToken: string): string =>
-  `${config.cookie.name}=${cartToken}; path=/; secure; HttpOnly; SameSite=Strict; Max-Age=${config.cookie.expiration}`
+import { generateCookieValue } from '../utils/cookie'
+import useRequest from '../utils/request'
 
 export async function viewCart({ request, event }: RouteProps): Promise<Response> {
-  const cookie = parse(request.headers.get('Cookie') || '')
-  const cartToken = cookie[config.cookie.name] ?? config.cookie.generator()
+  const { cartToken } = useRequest(request)
 
   const response = fetch(request)
   try {
@@ -30,8 +27,7 @@ export async function viewCart({ request, event }: RouteProps): Promise<Response
 }
 
 export async function fetchCart({ request }: RouteProps): Promise<Response> {
-  const cookie = parse(request.headers.get('Cookie') || '')
-  const cartToken = cookie[config.cookie.name] ?? config.cookie.generator()
+  const { cartToken } = useRequest(request)
 
   return loadCart(cartToken).then((cart) =>
     createResponse(cart, { 'Set-Cookie': generateCookieValue(cartToken) }, 200),
@@ -39,9 +35,7 @@ export async function fetchCart({ request }: RouteProps): Promise<Response> {
 }
 
 export async function addItem({ request, event }: RouteProps): Promise<Response> {
-  const cookie = parse(request.headers.get('Cookie') || '')
-  const cartToken = cookie[config.cookie.name] ?? config.cookie.generator()
-
+  const { cartToken } = useRequest(request)
   const cart = await loadCart(cartToken)
 
   const payload: { items: CartItem[] } = await request.json()
@@ -77,9 +71,7 @@ export async function addItem({ request, event }: RouteProps): Promise<Response>
 }
 
 export async function updateItem({ request, event }: RouteProps): Promise<Response> {
-  const cookie = parse(request.headers.get('Cookie') || '')
-  const cartToken = cookie[config.cookie.name] ?? config.cookie.generator()
-
+  const { cartToken } = useRequest(request)
   const cart = await loadCart(cartToken)
 
   const payload: { id: number | string; quantity: number } = await request.json()
@@ -117,10 +109,7 @@ export async function updateItem({ request, event }: RouteProps): Promise<Respon
 }
 
 export async function updateCart({ request, event }: RouteProps): Promise<Response> {
-  const host = new URL(request.url).hostname
-  const cookie = parse(request.headers.get('Cookie') || '')
-  const cartToken = cookie[config.cookie.name] ?? config.cookie.generator()
-
+  const { host, cartToken } = useRequest(request)
   const cart = await loadCart(cartToken)
 
   const payload: {
@@ -175,9 +164,7 @@ export async function updateCart({ request, event }: RouteProps): Promise<Respon
 }
 
 export async function clearCart({ request, event }: RouteProps): Promise<Response> {
-  const host = new URL(request.url).hostname
-  const cookie = parse(request.headers.get('Cookie') || '')
-  const oldCartToken = cookie[config.cookie.name] ?? config.cookie.generator()
+  const { host, cartToken: oldCartToken } = useRequest(request)
   const newCartToken = config.cookie.generator()
 
   event.waitUntil(CART_STORE.delete(oldCartToken))

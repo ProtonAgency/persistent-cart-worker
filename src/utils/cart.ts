@@ -17,7 +17,7 @@ export async function generateCart(
     },
   })
 
-  // unsure if this is actually needed
+  // this is not actually needed
   // await fetch(`https://${host}/cart.js`, {
   //   headers: {
   //     ...buildHeaders(request),
