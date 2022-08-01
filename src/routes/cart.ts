@@ -1,9 +1,8 @@
 import { RouteProps } from '../router'
 import { parse } from 'cookie'
 import createResponse from '../utils/response'
-import loadCart from '../utils/load-cart'
 import buildHeaders from '../utils/build-headers'
-import { generateCart } from '../utils/cart'
+import { generateCart, loadCart } from '../utils/cart'
 import config from '../../cart.config'
 
 const generateCookieValue = (cartToken: string): string =>
