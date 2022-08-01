@@ -11,7 +11,7 @@ export async function generateCart(
     properties: KeyValueObject | null | undefined
   }[] = [],
 ): Promise<{ cart: Cart; headers: Headers; message: string | undefined }> {
-  const { host } = useRequest(request)
+  const { host } = await useRequest(request)
   await fetch(`https://${host}/cart/clear.js`, {
     headers: buildHeaders(request),
   })
@@ -95,7 +95,7 @@ export async function loadCart(token: string): Promise<Cart> {
 }
 
 export async function loadCartFromOrigin(request: Request): Promise<Cart> {
-  const { host } = useRequest(request)
+  const { host } = await useRequest(request)
 
   return fetch(`https://${host}/cart.js`, {
     headers: buildHeaders(request),

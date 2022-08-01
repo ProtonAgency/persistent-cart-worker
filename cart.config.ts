@@ -26,7 +26,11 @@ export default {
   /** Origin (Shopify) Cart Settings */
   cart: {
     loading: {
-      // if set to true the cart will be reloaded in the background (use if deploying over an existing shopify store to sync existing customer carts)
+      /**
+       * if set to true the cart will be reloaded from origin in the background 
+       * (use if deploying over an existing shopify store to sync existing customer carts)
+       * (it may take a few refreshes to load the origin cart as this is done in the background)
+       */
       background: true,
     },
   },

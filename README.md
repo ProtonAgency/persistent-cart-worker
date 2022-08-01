@@ -2,6 +2,16 @@
 
 A Cloudflare Worker that runs over a Shopify store utilizing Cloudflare O2O to persist a customers cart contents longer than the random Shopify expiration (7-14 days).
 
+## Features
+
+- Persits cart for a configured timeframe (default one year).
+- Encrypted cookies.
+- Loads old carts from origin.
+- Works with line item scripts.
+- Requires no frontend changes to integrate.
+- Works with all Shopify Apps.
+- Requires no data integrations with Shopify.
+
 ## How does it work?
 
 This works by proxying the `/cart*.js` routes and the `/cart` route. When a call is made to `/cart/add.js`, `/cart/update.js` or `/cart/change.js` the shopify cart is cleared, then the cached cart contents are added back with the new request data. If the add fails we return the error from Shopify, if it is successful we cache the cart and update the `cart` cookie in the browser.

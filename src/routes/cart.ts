@@ -7,7 +7,7 @@ import { generateCookieValue } from '../utils/cookie'
 import useRequest from '../utils/request'
 
 export async function viewCart({ request, event }: RouteProps): Promise<Response> {
-  const { cartToken } = useRequest(request)
+  const { cartToken } = await useRequest(request)
 
   const response = fetch(request)
   try {
@@ -27,7 +27,7 @@ export async function viewCart({ request, event }: RouteProps): Promise<Response
 }
 
 export async function fetchCart({ request, event }: RouteProps): Promise<Response> {
-  const { cartToken } = useRequest(request)
+  const { cartToken } = await useRequest(request)
 
   const cart = await loadCart(cartToken)
   if (config.cart.loading.background && cart.item_count === 0) {
@@ -45,7 +45,7 @@ export async function fetchCart({ request, event }: RouteProps): Promise<Respons
 }
 
 export async function addItem({ request, event }: RouteProps): Promise<Response> {
-  const { cartToken } = useRequest(request)
+  const { cartToken } = await useRequest(request)
   const cart = await loadCart(cartToken)
 
   const payload: { items: CartItem[] } = await request.json()
@@ -81,7 +81,7 @@ export async function addItem({ request, event }: RouteProps): Promise<Response>
 }
 
 export async function updateItem({ request, event }: RouteProps): Promise<Response> {
-  const { cartToken } = useRequest(request)
+  const { cartToken } = await useRequest(request)
   const cart = await loadCart(cartToken)
 
   const payload: { id: number | string; quantity: number } = await request.json()
@@ -119,7 +119,7 @@ export async function updateItem({ request, event }: RouteProps): Promise<Respon
 }
 
 export async function updateCart({ request, event }: RouteProps): Promise<Response> {
-  const { host, cartToken } = useRequest(request)
+  const { host, cartToken } = await useRequest(request)
   const cart = await loadCart(cartToken)
 
   const payload: {
@@ -174,7 +174,7 @@ export async function updateCart({ request, event }: RouteProps): Promise<Respon
 }
 
 export async function clearCart({ request, event }: RouteProps): Promise<Response> {
-  const { host, cartToken: oldCartToken } = useRequest(request)
+  const { host, cartToken: oldCartToken } = await useRequest(request)
   const newCartToken = config.cookie.generator()
 
   event.waitUntil(CART_STORE.delete(oldCartToken))
