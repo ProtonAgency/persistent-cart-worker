@@ -18,7 +18,7 @@ declare global {
     line_price: number
     original_line_price: number
     total_discount: number
-    discounts: any[]
+    discounts: unknown[]
     sku: string
     grams: number
     vendor: string
@@ -48,7 +48,7 @@ declare global {
       name: string
       value: string
     }>
-    line_level_discount_allocations: any[]
+    line_level_discount_allocations: unknown[]
     line_level_total_discount: number
   }
 
@@ -65,7 +65,7 @@ declare global {
     requires_shipping: boolean
     currency: string
     items_subtotal_price: number
-    cart_level_discount_applications: Array<any>
+    cart_level_discount_applications: Array<unknown>
   }
 
   interface KeyValueObject {
