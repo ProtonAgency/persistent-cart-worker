@@ -7,7 +7,7 @@ declare global {
   const CART_STORE: KVNamespace
   interface CartItem {
     id: number //same as variant_id
-    properties: { [key: string]: string } | null
+    properties: KeyValueObject | null
     quantity: number
     variant_id: number
     key: string // variant_id:hash(unknown)
@@ -55,7 +55,7 @@ declare global {
   interface Cart {
     token: string
     note: string | null
-    attributes: { [key: string]: string } | null
+    attributes: KeyValueObject | null
     original_total_price: number
     total_price: number
     total_discount: number
@@ -66,5 +66,9 @@ declare global {
     currency: string
     items_subtotal_price: number
     cart_level_discount_applications: Array<any>
+  }
+
+  interface KeyValueObject {
+    [key: string]: string
   }
 }

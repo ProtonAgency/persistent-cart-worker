@@ -124,7 +124,7 @@ export async function updateCart({ request, event }: RouteProps): Promise<Respon
   const cart = await loadCart(cartToken)
 
   const payload: {
-    attributes: { [key: string]: string } | undefined | null
+    attributes: KeyValueObject | undefined | null
     note: string | undefined | null
   } = await request.json()
 

@@ -7,7 +7,7 @@ export async function generateCart(
   additionalItems: {
     id: number
     quantity: number
-    properties: { [key: string]: string } | null | undefined
+    properties: KeyValueObject | null | undefined
   }[] = [],
 ): Promise<{ cart: Cart; headers: Headers; message: string | undefined }> {
   const host = new URL(request.url).hostname
@@ -17,11 +17,12 @@ export async function generateCart(
     },
   })
 
-  await fetch(`https://${host}/cart.js`, {
-    headers: {
-      ...buildHeaders(request),
-    },
-  })
+  // unsure if this is actually needed
+  // await fetch(`https://${host}/cart.js`, {
+  //   headers: {
+  //     ...buildHeaders(request),
+  //   },
+  // })
 
   const addResponse = await fetch(`https://${host}/cart/add.js`, {
     method: 'POST',
@@ -33,7 +34,7 @@ export async function generateCart(
           ): {
             id: number
             quantity: number
-            properties: { [key: string]: string } | null | undefined
+            properties: KeyValueObject | null | undefined
           } => {
             return {
               id: it.id,
