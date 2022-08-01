@@ -22,7 +22,7 @@ export async function viewCart({ request, event }: RouteProps): Promise<Response
     const headers = new Headers({ 'Set-Cookie': generateCookieValue(cartToken) })
     if (cart.item_count > 0) {
       const { cart: newCart, headers: addResponseHeaders } = await generateCart(request, cart, cartToken)
-      event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
+      event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart), { expirationTtl: MAX_AGE }))
       addResponseHeaders.getAll('Set-Cookie').forEach((c) => headers.append('Set-Cookie', c))
     }
   } catch (e) {
@@ -78,7 +78,7 @@ export async function addItem({ request, event }: RouteProps): Promise<Response>
     return createResponse(JSON.parse(message), {}, 409, new URL(request.url).hostname)
   }
 
-  event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
+  event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart), { expirationTtl: MAX_AGE }))
 
   const newHeaders = new Headers(addResponseHeaders || {})
   newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
@@ -121,7 +121,7 @@ export async function updateItem({ request, event }: RouteProps): Promise<Respon
     return createResponse(JSON.parse(message), {}, 409, new URL(request.url).hostname)
   }
 
-  event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
+  event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart), { expirationTtl: MAX_AGE }))
 
   const newHeaders = new Headers(addResponseHeaders || {})
   newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
@@ -177,7 +177,7 @@ export async function updateCart({ request, event }: RouteProps): Promise<Respon
     token: cart.token,
   }
 
-  event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart)))
+  event.waitUntil(CART_STORE.put(cartToken, JSON.stringify(newCart), { expirationTtl: MAX_AGE }))
 
   const newHeaders = new Headers(addResponseHeaders || {})
   newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
