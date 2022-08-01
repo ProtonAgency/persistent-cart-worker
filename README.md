@@ -13,6 +13,8 @@ When you navigate to the `/cart` route we again clear the Shopify cart and add a
 Configuration can be found in `cart.config.ts`
 
 ```ts
+import { uuid } from '@cfworker/uuid'
+
 export default {
   cookie: {
     // first-party cookie name
