@@ -1,4 +1,5 @@
 import buildHeaders from './build-headers'
+import useRequest from './request'
 
 export async function generateCart(
   request: Request,
@@ -10,19 +11,10 @@ export async function generateCart(
     properties: KeyValueObject | null | undefined
   }[] = [],
 ): Promise<{ cart: Cart; headers: Headers; message: string | undefined }> {
-  const host = new URL(request.url).hostname
+  const { host } = useRequest(request)
   await fetch(`https://${host}/cart/clear.js`, {
-    headers: {
-      ...buildHeaders(request),
-    },
+    headers: buildHeaders(request),
   })
-
-  // this is not actually needed
-  // await fetch(`https://${host}/cart.js`, {
-  //   headers: {
-  //     ...buildHeaders(request),
-  //   },
-  // })
 
   const addResponse = await fetch(`https://${host}/cart/add.js`, {
     method: 'POST',
@@ -100,4 +92,12 @@ export async function loadCart(token: string): Promise<Cart> {
       cart_level_discount_applications: [],
     }
   )
+}
+
+export async function loadCartFromOrigin(request: Request): Promise<Cart> {
+  const { host } = useRequest(request)
+
+  return fetch(`https://${host}/cart.js`, {
+    headers: buildHeaders(request),
+  }).then((response) => response.json())
 }

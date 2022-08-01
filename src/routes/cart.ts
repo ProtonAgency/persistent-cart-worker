@@ -1,7 +1,7 @@
 import { RouteProps } from '../router'
 import createResponse from '../utils/response'
 import buildHeaders from '../utils/build-headers'
-import { generateCart, loadCart } from '../utils/cart'
+import { generateCart, loadCart, loadCartFromOrigin } from '../utils/cart'
 import config from '../../cart.config'
 import { generateCookieValue } from '../utils/cookie'
 import useRequest from '../utils/request'
@@ -12,7 +12,7 @@ export async function viewCart({ request, event }: RouteProps): Promise<Response
   const response = fetch(request)
   try {
     const cart = await loadCart(cartToken)
-    const headers = new Headers({ 'Set-Cookie': generateCookieValue(cartToken) })
+    const headers = new Headers({ 'Set-Cookie': await generateCookieValue(cartToken) })
     if (cart.item_count > 0) {
       const { cart: newCart, headers: addResponseHeaders } = await generateCart(request, cart, cartToken)
       event.waitUntil(
@@ -26,12 +26,22 @@ export async function viewCart({ request, event }: RouteProps): Promise<Response
   return response
 }
 
-export async function fetchCart({ request }: RouteProps): Promise<Response> {
+export async function fetchCart({ request, event }: RouteProps): Promise<Response> {
   const { cartToken } = useRequest(request)
 
-  return loadCart(cartToken).then((cart) =>
-    createResponse(cart, { 'Set-Cookie': generateCookieValue(cartToken) }, 200),
-  )
+  const cart = await loadCart(cartToken)
+  if (config.cart.loading.background && cart.item_count === 0) {
+    event.waitUntil(
+      (async () => {
+        const originCart = await loadCartFromOrigin(request)
+        if (originCart.item_count > 0) {
+          await CART_STORE.put(cartToken, JSON.stringify(originCart))
+        }
+      })(),
+    )
+  }
+
+  return createResponse(cart, { 'Set-Cookie': await generateCookieValue(cartToken) }, 200)
 }
 
 export async function addItem({ request, event }: RouteProps): Promise<Response> {
@@ -65,7 +75,7 @@ export async function addItem({ request, event }: RouteProps): Promise<Response>
   )
 
   const newHeaders = new Headers(addResponseHeaders || {})
-  newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
+  newHeaders.append('Set-Cookie', await generateCookieValue(cartToken))
 
   return createResponse(newCart, newHeaders, 200)
 }
@@ -103,7 +113,7 @@ export async function updateItem({ request, event }: RouteProps): Promise<Respon
   )
 
   const newHeaders = new Headers(addResponseHeaders || {})
-  newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
+  newHeaders.append('Set-Cookie', await generateCookieValue(cartToken))
 
   return createResponse(newCart, newHeaders, 200)
 }
@@ -158,7 +168,7 @@ export async function updateCart({ request, event }: RouteProps): Promise<Respon
   )
 
   const newHeaders = new Headers(addResponseHeaders || {})
-  newHeaders.append('Set-Cookie', generateCookieValue(cartToken))
+  newHeaders.append('Set-Cookie', await generateCookieValue(cartToken))
 
   return createResponse(newCart, newHeaders, 200)
 }
