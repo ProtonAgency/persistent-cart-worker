@@ -1,4 +1,4 @@
-name = "persistend-cart-worker"
+name = "persistent-cart-worker"
 main = "./dist/worker.js"
 account_id = "e56b18ce4c0cf671554cd09cd9b5e6f2"
 workers_dev = true
@@ -7,7 +7,7 @@ local_protocol="http"
 upstream_protocol="https"
 
 kv_namespaces = [
-  { binding = "CART_STORE", id = "", preview_id = "" }
+  { binding = "CART_STORE", id = "8fc70b3374744319bd31db4b0a345d4b", preview_id = "8fc70b3374744319bd31db4b0a345d4b" }
 ]
 
 [build]
